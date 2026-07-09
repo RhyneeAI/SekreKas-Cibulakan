@@ -1,0 +1,11 @@
+{
+  "name": "kkn-boilerplate",
+  "private": true,
+  "workspaces": ["web-kkn", "mobile-app"],
+  "scripts": {
+    "dev:web": "npm run dev -w web-kkn",
+    "dev:mobile": "npm run start -w mobile-app",
+    "migrate": "npm run migrate -w web-kkn",
+    "build:web": "npm run build -w web-kkn"
+  }
+}

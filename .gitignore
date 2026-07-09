@@ -1,5 +1,6 @@
 node_modules/
 .next/
+.expo/
 .env
 *.local
 .DS_Store
