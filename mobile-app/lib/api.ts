@@ -1,30 +1,39 @@
-// Ganti dengan URL deployment Next.js kamu (web-kkn)
-export const API_BASE_URL = "http://localhost:3000/api";
+import { Alert } from "react-native";
 
-export async function apiGet<T = any>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`);
-  return res.json();
+export const API_BASE_URL = "http://192.168.18.131:3001/api";
+
+async function request<T = any>(
+  method: string,
+  path: string,
+  body?: any
+): Promise<{ ok: boolean; data: T; status: number }> {
+  try {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      Alert.alert("Error", data.message || "Terjadi kesalahan");
+      return { ok: false, data, status: res.status };
+    }
+    return { ok: true, data, status: res.status };
+  } catch (e: any) {
+    Alert.alert("Network Error", "Tidak bisa terhubung ke server");
+    return { ok: false, data: null as T, status: 0 };
+  }
 }
 
-export async function apiPost<T = any>(path: string, body: any): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  return res.json();
+export function apiGet<T = any>(path: string) {
+  return request<T>("GET", path);
 }
-
-export async function apiPut<T = any>(path: string, body: any): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  return res.json();
+export function apiPost<T = any>(path: string, body: any) {
+  return request<T>("POST", path, body);
 }
-
-export async function apiDelete<T = any>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, { method: "DELETE" });
-  return res.json();
+export function apiPut<T = any>(path: string, body: any) {
+  return request<T>("PUT", path, body);
+}
+export function apiDelete<T = any>(path: string) {
+  return request<T>("DELETE", path);
 }
