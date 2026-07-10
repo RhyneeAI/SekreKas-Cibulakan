@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Modal,
+  View, Text, TextInput, Button, ActivityIndicator, TouchableOpacity, Modal,
 } from "react-native";
 import { apiGet } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -36,34 +36,34 @@ export default function LoginScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login KKN</Text>
+    <View className="flex-1 justify-center px-8 pt-12">
+      <Text className="text-2xl font-bold text-center mb-6">Login KKN</Text>
 
       <TouchableOpacity
         onPress={() => setShowPicker(true)}
-        style={styles.select}
+        className="border border-gray-300 rounded-lg p-3 mb-3"
       >
-        <Text style={{ color: selected ? "#000" : "#999" }}>
+        <Text className={selected ? "text-black" : "text-gray-400"}>
           {selected ? selected.nama : "-- Pilih Nama --"}
         </Text>
       </TouchableOpacity>
 
       <Modal visible={showPicker} transparent animationType="slide">
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <Text style={{ fontWeight: "bold", marginBottom: 8 }}>Pilih Nama</Text>
+        <View className="flex-1 justify-center bg-black/30 px-8">
+          <View className="bg-white rounded-xl p-5">
+            <Text className="font-bold mb-2">Pilih Nama</Text>
             {mahasiswaList.map((m) => (
               <TouchableOpacity
                 key={m.id}
                 onPress={() => { setSelected(m); setShowPicker(false); }}
-                style={styles.item}
+                className="py-3 border-b border-gray-200"
               >
                 <Text>{m.nama}</Text>
               </TouchableOpacity>
@@ -79,28 +79,12 @@ export default function LoginScreen() {
         maxLength={6}
         value={pin}
         onChangeText={setPin}
-        style={styles.input}
+        className="border border-gray-300 rounded-lg p-3 mb-3"
       />
 
       <Button title="Login" onPress={handleLogin} />
 
-      {error && <Text style={{ color: "red", marginTop: 8 }}>{error}</Text>}
+      {error && <Text className="text-red-500 mt-2">{error}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 32, paddingTop: 48 },
-  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 24 },
-  select: {
-    borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12, marginBottom: 12,
-  },
-  input: {
-    borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12, marginBottom: 12,
-  },
-  overlay: {
-    flex: 1, justifyContent: "center", backgroundColor: "rgba(0,0,0,0.3)", padding: 32,
-  },
-  modal: { backgroundColor: "#fff", borderRadius: 12, padding: 20 },
-  item: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#eee" },
-});

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  View, Text, FlatList, TextInput, Button, StyleSheet, ActivityIndicator, Alert, Modal, TouchableOpacity,
+  View, Text, FlatList, TextInput, Button, ActivityIndicator, Alert, Modal, TouchableOpacity,
 } from "react-native";
 import { apiGet, apiPost, apiPut, apiDelete } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -85,13 +85,15 @@ export default function KeuanganScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.saldo}>Saldo: Rp{saldo.toLocaleString("id-ID")}</Text>
+    <View className="flex-1 p-4 pt-12">
+      <Text className="text-xl font-bold mb-4">
+        Saldo: Rp{saldo.toLocaleString("id-ID")}
+      </Text>
 
-      {loading && <ActivityIndicator style={{ marginBottom: 8 }} />}
+      {loading && <ActivityIndicator className="mb-2" />}
 
       {editId && (
-        <Text style={{ color: "orange", marginBottom: 4 }}>
+        <Text className="text-orange-500 mb-1">
           Mengedit transaksi #{editId}
         </Text>
       )}
@@ -101,27 +103,27 @@ export default function KeuanganScreen() {
         keyboardType="numeric"
         value={nominal}
         onChangeText={setNominal}
-        style={styles.input}
+        className="border border-gray-300 rounded-lg p-2.5 mb-2"
       />
 
       <TouchableOpacity
         onPress={() => setShowKategori(true)}
-        style={[styles.input, { justifyContent: "center" }]}
+        className="border border-gray-300 rounded-lg p-2.5 mb-2 justify-center"
       >
-        <Text style={{ color: kategori ? "#000" : "#999" }}>
+        <Text className={kategori ? "text-black" : "text-gray-400"}>
           {kategori || "Pilih kategori"}
         </Text>
       </TouchableOpacity>
 
       <Modal visible={showKategori} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={{ fontWeight: "bold", marginBottom: 8 }}>Pilih Kategori</Text>
+        <View className="flex-1 justify-center bg-black/30 px-8">
+          <View className="bg-white rounded-xl p-5">
+            <Text className="font-bold mb-2">Pilih Kategori</Text>
             {KATEGORI_LIST.map((k) => (
               <TouchableOpacity
                 key={k}
                 onPress={() => { setKategori(k); setShowKategori(false); }}
-                style={styles.modalItem}
+                className="py-3 border-b border-gray-200"
               >
                 <Text>{k}</Text>
               </TouchableOpacity>
@@ -134,10 +136,10 @@ export default function KeuanganScreen() {
         placeholder="Keterangan"
         value={keterangan}
         onChangeText={setKeterangan}
-        style={styles.input}
+        className="border border-gray-300 rounded-lg p-2.5 mb-2"
       />
 
-      <View style={styles.row}>
+      <View className="flex-row justify-between mb-4">
         <Button title="+ Masuk" onPress={() => handleTambah("masuk")} />
         <Button title="- Keluar" onPress={() => handleTambah("keluar")} color="crimson" />
       </View>
@@ -146,18 +148,18 @@ export default function KeuanganScreen() {
         data={data}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <View style={{ flex: 1 }}>
+          <View className="flex-row items-center py-2 border-b border-gray-200">
+            <View className="flex-1">
               <Text>
                 {item.tanggal} — {item.jenis === "masuk" ? "+" : "-"}Rp
                 {item.nominal.toLocaleString("id-ID")}
               </Text>
-              <Text style={styles.subtext}>
+              <Text className="text-xs text-gray-500">
                 {item.keterangan} ({item.input_oleh})
                 {item.kategori ? ` — ${item.kategori}` : ""}
               </Text>
             </View>
-            <View style={styles.actions}>
+            <View className="flex-row gap-1">
               <Button title="Edit" onPress={() => handleEdit(item)} />
               <Button title="Hapus" color="red" onPress={() => handleDelete(item.id)} />
             </View>
@@ -167,41 +169,3 @@ export default function KeuanganScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 48 },
-  saldo: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-  },
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  subtext: { color: "#666", fontSize: 12 },
-  actions: { flexDirection: "row", gap: 4 },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    padding: 32,
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-  },
-  modalItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-});

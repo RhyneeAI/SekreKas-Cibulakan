@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  View, Text, FlatList, TextInput, Button, StyleSheet, ActivityIndicator, Alert, Image,
+  View, Text, FlatList, TextInput, Button, ActivityIndicator, Alert, Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { apiGet, apiPost, apiPut, apiDelete } from "../lib/api";
@@ -113,11 +113,11 @@ export default function LogbookScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      {loading && <ActivityIndicator style={{ marginBottom: 8 }} />}
+    <View className="flex-1 p-4 pt-12">
+      {loading && <ActivityIndicator className="mb-2" />}
 
       {editId && (
-        <Text style={{ color: "orange", marginBottom: 4 }}>
+        <Text className="text-orange-500 mb-1">
           Mengedit logbook #{editId}
         </Text>
       )}
@@ -126,23 +126,23 @@ export default function LogbookScreen() {
         placeholder="Judul kegiatan"
         value={kegiatan}
         onChangeText={setKegiatan}
-        style={styles.input}
+        className="border border-gray-300 rounded-lg p-2.5 mb-2"
       />
       <TextInput
         placeholder="Deskripsi"
         value={deskripsi}
         onChangeText={setDeskripsi}
         multiline
-        style={[styles.input, { height: 80 }]}
+        className="border border-gray-300 rounded-lg p-2.5 mb-2 h-20"
       />
 
-      <View style={styles.row}>
+      <View className="flex-row justify-between mb-2">
         <Button title="Pilih Foto" onPress={pickImage} />
         <Button title="Ambil Foto" onPress={takePhoto} />
       </View>
 
       {fotoUri && (
-        <Image source={{ uri: fotoUri }} style={styles.preview} />
+        <Image source={{ uri: fotoUri }} className="w-52 h-36 rounded-lg mb-2 self-center" />
       )}
 
       <Button title={editId ? "Simpan Perubahan" : "Simpan Logbook"} onPress={handleSimpan} />
@@ -150,20 +150,20 @@ export default function LogbookScreen() {
       <FlatList
         data={data}
         keyExtractor={(item) => String(item.id)}
-        style={{ marginTop: 16 }}
+        className="mt-4"
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.title}>
+          <View className="flex-row items-center py-2 border-b border-gray-200">
+            <View className="flex-1">
+              <Text className="font-bold">
                 {item.tanggal} — {item.kegiatan}
               </Text>
-              <Text style={styles.subtext}>{item.deskripsi}</Text>
+              <Text className="text-xs text-gray-500">{item.deskripsi}</Text>
               {item.foto_url && (
-                <Image source={{ uri: item.foto_url }} style={styles.thumb} />
+                <Image source={{ uri: item.foto_url }} className="w-20 h-15 rounded mt-1" />
               )}
-              <Text style={styles.subtext}>oleh {item.nama}</Text>
+              <Text className="text-xs text-gray-500">oleh {item.nama}</Text>
             </View>
-            <View style={styles.actions}>
+            <View className="flex-row gap-1">
               <Button title="Edit" onPress={() => handleEdit(item)} />
               <Button title="Hapus" color="red" onPress={() => handleDelete(item.id)} />
             </View>
@@ -173,27 +173,3 @@ export default function LogbookScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 48 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-  },
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  preview: { width: 200, height: 150, borderRadius: 8, marginBottom: 8, alignSelf: "center" },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  title: { fontWeight: "bold" },
-  subtext: { color: "#666", fontSize: 12 },
-  actions: { flexDirection: "row", gap: 4 },
-  thumb: { width: 80, height: 60, borderRadius: 4, marginTop: 4 },
-});
