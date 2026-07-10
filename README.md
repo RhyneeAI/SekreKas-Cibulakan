@@ -29,3 +29,4 @@ npm run dev:mobile        # mobile → expo start
 ## Yang masih perlu dilengkapi
 - Auth sederhana di mobile app (saat ini `mahasiswa_id` masih hardcode `1`)
 - Deploy `web-kkn` ke hosting (Vercel/VPS) supaya `mobile-app` bisa hit API dari luar
+# SekreKas-Cibulakan
