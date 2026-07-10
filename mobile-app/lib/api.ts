@@ -1,6 +1,11 @@
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 
-export const API_BASE_URL = "http://192.168.18.131:3001/api";
+const DEV_HOST =
+  Platform.OS === "web"
+    ? "http://localhost:3001/api"
+    : "http://192.168.18.131:3001/api";
+
+export const API_BASE_URL = DEV_HOST;
 
 async function request<T = any>(
   method: string,

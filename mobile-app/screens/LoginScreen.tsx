@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
 import {
-  View, Text, TextInput, Button, ActivityIndicator, TouchableOpacity, Modal,
+  View,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  TouchableOpacity,
+  Modal,
+  Pressable,
 } from "react-native";
 import { apiGet } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { PageShell } from "../components/PageShell";
+import { Alert } from "../components/Alert";
 
 type Mahasiswa = { id: number; nama: string };
 
@@ -14,11 +22,12 @@ export default function LoginScreen() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const res = await apiGet("/mahasiswa");
+      const res = await apiGet("/mahasiswa?pengurus=1");
       if (res.ok) setMahasiswaList(res.data.data || []);
       setLoading(false);
     })();
@@ -30,61 +39,99 @@ export default function LoginScreen() {
       return;
     }
     setError(null);
+    setSubmitting(true);
     const msg = await login(selected.id, pin);
+    setSubmitting(false);
     if (msg) setError(msg);
   }
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
-      </View>
+      <PageShell title="Login" subtitle="Memuat data pengurus...">
+        <View className="bg-white/60 border border-border rounded-2xl p-5 items-center py-8">
+          <ActivityIndicator size="large" color="#C68A3E" />
+        </View>
+      </PageShell>
     );
   }
 
   return (
-    <View className="flex-1 justify-center px-8 pt-12">
-      <Text className="text-2xl font-bold text-center mb-6">Login KKN</Text>
+    <PageShell
+      title="Login Pengurus"
+      subtitle="Gunakan PIN yang sudah didaftarkan di web absensi (/absen)"
+    >
+      <View className="bg-white/60 border border-border rounded-2xl p-5">
+        <Text className="text-sm font-medium text-text mb-2">Nama</Text>
+        <TouchableOpacity
+          onPress={() => setShowPicker(true)}
+          className="bg-white/70 border border-border rounded-xl px-4 py-3 mb-4"
+          activeOpacity={0.7}
+        >
+          <Text className={selected ? "text-text font-medium" : "text-muted"}>
+            {selected ? selected.nama : "-- Pilih Nama --"}
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => setShowPicker(true)}
-        className="border border-gray-300 rounded-lg p-3 mb-3"
-      >
-        <Text className={selected ? "text-black" : "text-gray-400"}>
-          {selected ? selected.nama : "-- Pilih Nama --"}
-        </Text>
-      </TouchableOpacity>
+        <Text className="text-sm font-medium text-text mb-2">PIN</Text>
+        <TextInput
+          placeholder="••••"
+          placeholderTextColor="#8B7A6B"
+          secureTextEntry
+          keyboardType="numeric"
+          maxLength={6}
+          value={pin}
+          onChangeText={setPin}
+          className="bg-white/70 border border-border rounded-xl px-4 py-3 mb-4 text-text text-center text-lg tracking-widest"
+        />
+
+        <Pressable
+          onPress={handleLogin}
+          disabled={submitting}
+          className="bg-primary rounded-xl py-3 active:opacity-90 disabled:opacity-50"
+        >
+          <Text className="text-white text-center font-medium text-base">
+            {submitting ? "Memproses..." : "Masuk"}
+          </Text>
+        </Pressable>
+      </View>
 
       <Modal visible={showPicker} transparent animationType="slide">
-        <View className="flex-1 justify-center bg-black/30 px-8">
-          <View className="bg-white rounded-xl p-5">
-            <Text className="font-bold mb-2">Pilih Nama</Text>
-            {mahasiswaList.map((m) => (
-              <TouchableOpacity
-                key={m.id}
-                onPress={() => { setSelected(m); setShowPicker(false); }}
-                className="py-3 border-b border-gray-200"
-              >
-                <Text>{m.nama}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        <Pressable
+          className="flex-1 justify-end bg-black/30"
+          onPress={() => setShowPicker(false)}
+        >
+          <Pressable className="bg-cream rounded-t-2xl max-h-[70%]" onPress={() => {}}>
+            <View className="p-5 border-b border-border">
+              <Text className="text-lg font-bold text-text">Pilih Nama</Text>
+              <Text className="text-sm text-muted mt-1">
+                Pengurus kelompok KKN
+              </Text>
+            </View>
+            <View className="px-5 pb-8">
+              {mahasiswaList.map((m) => (
+                <TouchableOpacity
+                  key={m.id}
+                  onPress={() => {
+                    setSelected(m);
+                    setShowPicker(false);
+                  }}
+                  className="py-3 border-b border-border active:bg-white/40"
+                  activeOpacity={0.7}
+                >
+                  <Text className="text-text font-medium">{m.nama}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Pressable>
+        </Pressable>
       </Modal>
 
-      <TextInput
-        placeholder="PIN"
-        secureTextEntry
-        keyboardType="numeric"
-        maxLength={6}
-        value={pin}
-        onChangeText={setPin}
-        className="border border-gray-300 rounded-lg p-3 mb-3"
-      />
+      {error && <Alert type="error">{error}</Alert>}
 
-      <Button title="Login" onPress={handleLogin} />
-
-      {error && <Text className="text-red-500 mt-2">{error}</Text>}
-    </View>
+      <Text className="text-xs text-muted text-center mt-6 leading-5">
+        Belum punya PIN? Daftar sekali di halaman web absensi, lalu kembali ke
+        sini untuk login.
+      </Text>
+    </PageShell>
   );
 }

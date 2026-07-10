@@ -3,7 +3,7 @@ INSERT INTO kkn_mahasiswa (nama, nim, jabatan, fakultas_prodi) VALUES
   ('Moch Rifki Mulyana', 'KKN-002', 'Wakil Ketua', 'Hukum'),
   ('Hani Ainunisa', 'KKN-003', 'Sekretaris', 'Fakultas Ekonomi dan Bisnis Islam (FEBI)/Prodi Ekonomi Syariah'),
   ('Luhung Lugina', 'KKN-004', 'Sekretaris', 'Fakultas Teknik/Prodi Informatika'),
-  ('Ira Nurhayati', 'KKN-005', NULL, 'Fakultas Ekonomi dan Bisnis Islam (FEBI)/Prodi Perbankan Syariah'),
+  ('Ira Nurhayati', 'KKN-005', 'Bendahara', 'Fakultas Ekonomi dan Bisnis Islam (FEBI)/Prodi Perbankan Syariah'),
   ('Marlina Sifa Sulaeman', 'KKN-006', 'Divisi Acara', 'Ekonomi dan Bisnis Islam (FEBI)/Prodi Ekonomi Syariah'),
   ('Aulia Herawati Hermawan', 'KKN-007', 'Divisi Logistik', 'Fakultas Keguruan dan Ilmu Pengetahuan/Prodi Pendidikan Jasmani dan Rohani (PJKR)'),
   ('Muhammad Sultan Fadilah', 'KKN-008', 'Divisi Acara', 'Fakultas Sains Terapan/Prodi Agribisnis'),
