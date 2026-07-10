@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Absensi KKN",
   description: "Sistem absensi KKN tanpa login",
@@ -10,9 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif" }}>
-        {children}
-      </body>
+      <body className="m-0 font-sans antialiased">{children}</body>
     </html>
   );
 }

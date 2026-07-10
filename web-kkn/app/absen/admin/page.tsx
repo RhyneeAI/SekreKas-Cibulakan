@@ -25,8 +25,8 @@ export default function AdminQRPage() {
   }, []);
 
   return (
-    <main style={{ padding: 24, maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-      <h1>QR Absensi Hari Ini</h1>
+    <main className="p-6 max-w-sm mx-auto text-center">
+      <h1 className="text-2xl font-bold mb-4">QR Absensi Hari Ini</h1>
 
       {loading && <p>Memuat...</p>}
 
@@ -34,17 +34,20 @@ export default function AdminQRPage() {
         <img
           src={qrDataUrl}
           alt="QR Code Absensi"
-          style={{ width: 300, height: 300, display: "block", margin: "0 auto" }}
+          className="w-72 h-72 mx-auto block"
         />
       )}
 
       {expiredAt && (
-        <p style={{ color: "#666", fontSize: 14 }}>
+        <p className="text-gray-500 text-sm mt-2">
           Berlaku hingga: {new Date(expiredAt).toLocaleString("id-ID")}
         </p>
       )}
 
-      <button onClick={fetchQR} style={{ padding: "12px 24px", marginTop: 12 }}>
+      <button
+        onClick={fetchQR}
+        className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg"
+      >
         Perbarui QR
       </button>
     </main>

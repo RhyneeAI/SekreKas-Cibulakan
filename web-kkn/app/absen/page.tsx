@@ -147,20 +147,20 @@ export default function AbsenPage() {
     };
   }, [scanning]);
 
-  if (mode === "loading") return <main style={{ padding: 24 }}>Memuat...</main>;
+  if (mode === "loading") return <main className="p-6">Memuat...</main>;
 
   if (scanning) {
     return (
-      <main style={{ padding: 24, maxWidth: 400, margin: "0 auto" }}>
-        <h2>Arahkan kamera ke QR Code</h2>
+      <main className="p-6 max-w-sm mx-auto text-center">
+        <h2 className="text-lg font-semibold mb-4">Arahkan kamera ke QR Code</h2>
         <div
           id="qr-preview"
           ref={previewRef}
-          style={{ width: "100%", aspectRatio: "1/1", background: "#000" }}
+          className="w-full aspect-square bg-black"
         />
         <button
           onClick={stopScanner}
-          style={{ marginTop: 12, padding: "8px 16px" }}
+          className="mt-3 px-4 py-2 bg-gray-200 rounded"
         >
           Batal
         </button>
@@ -170,21 +170,26 @@ export default function AbsenPage() {
 
   if (mode === "ready" && device) {
     return (
-      <main style={{ padding: 24, maxWidth: 400, margin: "0 auto" }}>
-        <h1>Absensi KKN</h1>
-        <p>Halo, {device.nama}</p>
-        <button onClick={startScanner} style={{ padding: "12px 24px" }}>
+      <main className="p-6 max-w-sm mx-auto text-center">
+        <h1 className="text-2xl font-bold mb-4">Absensi KKN</h1>
+        <p className="mb-6">Halo, {device.nama}</p>
+        <button
+          onClick={startScanner}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg text-lg"
+        >
           Scan QR & Absen
         </button>
-        {message && <p>{message}</p>}
+        {message && <p className="mt-4 text-red-600">{message}</p>}
       </main>
     );
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 400, margin: "0 auto" }}>
-      <h1>{mode === "register" ? "Daftar Device" : "Verifikasi PIN"}</h1>
-      <p>
+    <main className="p-6 max-w-sm mx-auto">
+      <h1 className="text-2xl font-bold mb-2">
+        {mode === "register" ? "Daftar Device" : "Verifikasi PIN"}
+      </h1>
+      <p className="text-sm text-gray-600 mb-4">
         {mode === "register"
           ? "Device baru terdeteksi. Pilih nama kamu dan buat PIN (hanya sekali)."
           : "Device baru terdeteksi. Masukkan nama dan PIN yang sudah kamu buat sebelumnya."}
@@ -193,7 +198,7 @@ export default function AbsenPage() {
       <select
         value={selectedMhs}
         onChange={(e) => setSelectedMhs(Number(e.target.value))}
-        style={{ display: "block", marginBottom: 12, padding: 8, width: "100%" }}
+        className="block w-full p-2 border rounded mb-3"
       >
         <option value="">-- Pilih Nama --</option>
         {mahasiswaList.map((m) => (
@@ -210,26 +215,29 @@ export default function AbsenPage() {
         placeholder="PIN (4-6 digit)"
         value={pin}
         onChange={(e) => setPin(e.target.value)}
-        style={{ display: "block", marginBottom: 12, padding: 8, width: "100%" }}
+        className="block w-full p-2 border rounded mb-3"
       />
 
       <button
         onClick={mode === "register" ? handleRegister : handleVerifyPin}
-        style={{ padding: "12px 24px", width: "100%" }}
+        className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium"
       >
         {mode === "register" ? "Daftar" : "Verifikasi"}
       </button>
 
       {mode === "register" && (
-        <p style={{ marginTop: 12 }}>
+        <p className="mt-3 text-sm">
           Sudah pernah daftar dari device lain?{" "}
-          <button onClick={() => setMode("verify")} style={{ textDecoration: "underline" }}>
+          <button
+            onClick={() => setMode("verify")}
+            className="text-blue-600 underline"
+          >
             Masukkan PIN
           </button>
         </p>
       )}
 
-      {message && <p style={{ color: "red" }}>{message}</p>}
+      {message && <p className="mt-3 text-red-600">{message}</p>}
     </main>
   );
 }
