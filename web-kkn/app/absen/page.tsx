@@ -167,7 +167,8 @@ export default function AbsenPage() {
           scanHandledRef.current = true;
           setScanning(false);
           doCheckIn(decodedText);
-        }
+        },
+        undefined
       )
       .catch(() => {
         if (!cancelled) {
