@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { todayJakarta } from "@/lib/date";
 
 export async function GET(req: NextRequest) {
-  const tanggal =
-    req.nextUrl.searchParams.get("tanggal") ||
-    new Date().toISOString().slice(0, 10);
+  const tanggal = req.nextUrl.searchParams.get("tanggal") || todayJakarta();
 
   const data = await query<any[]>(
     `SELECT m.id AS mahasiswa_id, m.nama, a.waktu_masuk

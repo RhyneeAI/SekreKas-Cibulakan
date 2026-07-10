@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { todayJakarta } from "@/lib/date";
+import { isValidAbsenQrToken } from "@/lib/absen-qr";
 
 export async function POST(req: NextRequest) {
   const { uuid, qr_token } = await req.json();
@@ -12,17 +14,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Validasi qr_token
-  const tokenRows = await query<any[]>(
-    "SELECT * FROM kkn_qr_token WHERE token = ? AND expired_at > NOW()",
-    [qr_token]
-  );
-  if (tokenRows.length === 0) {
+  if (!(await isValidAbsenQrToken(qr_token))) {
     return NextResponse.json(
-      { success: false, message: "QR tidak valid atau sudah kedaluwarsa" },
+      { success: false, message: "QR tidak valid" },
       { status: 400 }
     );
   }
+
+  const today = todayJakarta();
 
   // Resolve mahasiswa dari uuid
   const binding = await query<any[]>(
@@ -40,8 +39,6 @@ export async function POST(req: NextRequest) {
     );
   }
   const mahasiswaId = binding[0].mahasiswa_id;
-
-  const today = new Date().toISOString().slice(0, 10);
 
   try {
     await query(

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiPost, apiGet } from "./api";
+import { apiPost } from "./api";
+import { randomUUID } from "./uuid";
 
 type User = {
   mahasiswa_id: number;
@@ -30,9 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(mahasiswa_id: number, pin: string): Promise<string | null> {
-    const uuid = crypto.randomUUID();
-    const res = await apiPost("/absensi/verify-pin", { mahasiswa_id, pin, uuid });
-    if (!res.ok) return res.data?.message || "PIN salah";
+    const uuid = randomUUID();
+    const res = await apiPost<{ message?: string; mahasiswa_id: number; nama: string }>(
+      "/absensi/verify-pin",
+      { mahasiswa_id, pin, uuid },
+      { silent: true }
+    );
+    if (!res.ok) {
+      return res.message || res.data?.message || "PIN salah atau server tidak terjangkau";
+    }
     const userData: User = { mahasiswa_id: res.data.mahasiswa_id, nama: res.data.nama };
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
     setUser(userData);

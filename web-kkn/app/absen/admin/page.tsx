@@ -6,7 +6,6 @@ import { PageShell } from "@/components/PageShell";
 import { LoadingCard } from "@/components/LoadingCard";
 
 export default function AdminQRPage() {
-  const [expiredAt, setExpiredAt] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -15,7 +14,6 @@ export default function AdminQRPage() {
     setRefreshing(true);
     const res = await fetch("/api/absensi/qr-today");
     const data = await res.json();
-    setExpiredAt(data.expired_at);
     const url = await QRCode.toDataURL(data.token, {
       width: 280,
       margin: 2,
@@ -33,15 +31,15 @@ export default function AdminQRPage() {
   return (
     <PageShell
       title="QR Absensi"
-      subtitle="Tampilkan QR ini untuk di-scan anggota kelompok"
+      subtitle="QR tetap — cetak sekali, dipakai setiap hari"
     >
       {loading ? (
-        <LoadingCard label="Memuat QR hari ini..." />
+        <LoadingCard label="Memuat QR absensi..." />
       ) : (
         <>
           <div className="card text-center">
             <p className="text-xs font-medium text-secondary uppercase tracking-wider mb-4">
-              QR Hari Ini
+              QR Absensi Kelompok
             </p>
 
             {qrDataUrl && (
@@ -54,17 +52,9 @@ export default function AdminQRPage() {
               </div>
             )}
 
-            {expiredAt && (
-              <p className="text-sm text-muted">
-                Berlaku hingga{" "}
-                <span className="font-medium text-text">
-                  {new Date(expiredAt).toLocaleString("id-ID", {
-                    dateStyle: "long",
-                    timeStyle: "short",
-                  })}
-                </span>
-              </p>
-            )}
+            <p className="text-sm text-muted">
+              Berlaku permanen — absensi tetap dicatat per hari
+            </p>
           </div>
 
           <button
@@ -72,13 +62,14 @@ export default function AdminQRPage() {
             disabled={refreshing}
             className="btn-primary mt-4"
           >
-            {refreshing ? "Memperbarui..." : "Perbarui QR"}
+            {refreshing ? "Memuat..." : "Muat Ulang Tampilan"}
           </button>
 
           <p className="text-xs text-muted text-center mt-6 leading-relaxed">
-            Buka halaman ini setiap pagi dan tampilkan QR ke anggota yang akan
-            absen via{" "}
-            <span className="font-medium text-secondary">/absen</span>
+            Cetak atau screenshot QR ini sekali, lalu tempel di sekretariat.
+            Anggota scan setiap pagi via{" "}
+            <span className="font-medium text-secondary">/absen</span> — masing-masing
+            cukup sekali per hari.
           </p>
         </>
       )}

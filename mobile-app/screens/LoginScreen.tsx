@@ -27,8 +27,14 @@ export default function LoginScreen() {
 
   useEffect(() => {
     (async () => {
-      const res = await apiGet("/mahasiswa?pengurus=1");
-      if (res.ok) setMahasiswaList(res.data.data || []);
+      const res = await apiGet<{ data: Mahasiswa[] }>("/mahasiswa?pengurus=1", {
+        silent: true,
+      });
+      if (res.ok) {
+        setMahasiswaList(res.data.data || []);
+      } else {
+        setError(res.message ?? "Gagal memuat daftar pengurus");
+      }
       setLoading(false);
     })();
   }, []);

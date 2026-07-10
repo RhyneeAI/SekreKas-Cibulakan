@@ -7,6 +7,7 @@ import LoginScreen from "./screens/LoginScreen";
 import KeuanganScreen from "./screens/KeuanganScreen";
 import LogbookScreen from "./screens/LogbookScreen";
 import AbsensiRekapScreen from "./screens/AbsensiRekapScreen";
+import PiketScreen from "./screens/PiketScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -28,6 +29,7 @@ function AppContent() {
       <Tab.Navigator>
         <Tab.Screen name="Keuangan" component={KeuanganScreen} />
         <Tab.Screen name="Logbook" component={LogbookScreen} />
+        <Tab.Screen name="Piket" component={PiketScreen} />
         <Tab.Screen name="Absensi" component={AbsensiRekapScreen} />
       </Tab.Navigator>
     </NavigationContainer>

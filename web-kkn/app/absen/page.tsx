@@ -17,6 +17,15 @@ type StoredDevice = {
 
 type Mahasiswa = { id: number; nama: string };
 
+type PiketHariIni = {
+  assign_id: number;
+  jadwal_id: number;
+  nama_jadwal: string;
+  sudah_absen: boolean;
+};
+
+type AbsenMode = "harian" | "piket";
+
 type Message = { type: "success" | "error"; text: string } | null;
 
 export default function AbsenPage() {
@@ -30,6 +39,9 @@ export default function AbsenPage() {
   const [message, setMessage] = useState<Message>(null);
   const [scanning, setScanning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [absenMode, setAbsenMode] = useState<AbsenMode>("harian");
+  const [piketList, setPiketList] = useState<PiketHariIni[]>([]);
+  const [selectedJadwalId, setSelectedJadwalId] = useState<number | "">("");
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scanHandledRef = useRef(false);
 
@@ -65,13 +77,27 @@ export default function AbsenPage() {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      setDevice(JSON.parse(stored));
+      const parsed: StoredDevice = JSON.parse(stored);
+      setDevice(parsed);
       setMode("ready");
+      void fetchPiketHariIni(parsed.uuid);
       return;
     }
     setMode("register");
     fetchMahasiswa();
   }, []);
+
+  async function fetchPiketHariIni(uuid: string) {
+    const res = await fetch(`/api/piket/hari-ini?uuid=${encodeURIComponent(uuid)}`);
+    if (!res.ok) return;
+    const json = await res.json();
+    const list: PiketHariIni[] = json.data ?? [];
+    setPiketList(list);
+    const belumAbsen = list.filter((p) => !p.sudah_absen);
+    if (belumAbsen.length === 1) {
+      setSelectedJadwalId(belumAbsen[0].jadwal_id);
+    }
+  }
 
   async function fetchMahasiswa() {
     const res = await fetch("/api/mahasiswa");
@@ -103,6 +129,7 @@ export default function AbsenPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
       setDevice(stored);
       setMode("ready");
+      void fetchPiketHariIni(stored.uuid);
       setMessage(null);
     } else {
       setMessage({ type: "error", text: data.message });
@@ -133,6 +160,7 @@ export default function AbsenPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
       setDevice(stored);
       setMode("ready");
+      void fetchPiketHariIni(stored.uuid);
       setMessage(null);
     } else {
       setMessage({ type: "error", text: data.message });
@@ -140,6 +168,10 @@ export default function AbsenPage() {
   }
 
   function startScanner() {
+    if (absenMode === "piket" && !selectedJadwalId) {
+      setMessage({ type: "error", text: "Pilih jadwal piket terlebih dahulu" });
+      return;
+    }
     setScanning(true);
     setMessage(null);
   }
@@ -158,18 +190,32 @@ export default function AbsenPage() {
   async function doCheckIn(token: string) {
     if (!device) return;
     setSubmitting(true);
-    const res = await fetch("/api/absensi/check-in", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uuid: device.uuid, qr_token: token }),
-    });
+
+    const isPiket = absenMode === "piket";
+    const res = await fetch(
+      isPiket ? "/api/piket/check-in" : "/api/absensi/check-in",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          isPiket
+            ? { uuid: device.uuid, qr_token: token, jadwal_id: selectedJadwalId }
+            : { uuid: device.uuid, qr_token: token }
+        ),
+      }
+    );
     const data = await res.json();
     setSubmitting(false);
-    setMessage(
-      data.success
-        ? { type: "success", text: `Absen berhasil, ${device.nama}!` }
-        : { type: "error", text: data.message }
-    );
+
+    if (data.success) {
+      const label = isPiket
+        ? `Absen piket "${data.nama_jadwal}" berhasil, ${device.nama}!`
+        : `Absen harian berhasil, ${device.nama}!`;
+      setMessage({ type: "success", text: label });
+      void fetchPiketHariIni(device.uuid);
+    } else {
+      setMessage({ type: "error", text: data.message });
+    }
   }
 
   useEffect(() => {
@@ -232,7 +278,7 @@ export default function AbsenPage() {
     return (
       <PageShell
         title="Scan QR"
-        subtitle="Arahkan kamera ke QR Code absensi hari ini"
+        subtitle="Arahkan kamera ke QR Code absensi kelompok"
       >
         <div className="card overflow-hidden p-0 relative animate-scale-in">
           <div id="qr-preview" className="w-full aspect-square bg-text" />
@@ -250,6 +296,8 @@ export default function AbsenPage() {
 
   if (mode === "ready" && device) {
     const isSuccess = message?.type === "success";
+    const piketTersedia = piketList.some((p) => !p.sudah_absen);
+    const piketBelumAbsen = piketList.filter((p) => !p.sudah_absen);
 
     return (
       <PageShell title="Absensi" subtitle={`Halo, ${device.nama}`}>
@@ -267,6 +315,82 @@ export default function AbsenPage() {
           </div>
           <p className="text-sm text-muted mb-1">Device terdaftar</p>
           <p className="font-semibold text-text text-lg mb-6">{device.nama}</p>
+
+          <div className="text-left space-y-4 mb-6">
+            <p className="text-sm font-medium text-text">Jenis absensi</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAbsenMode("harian");
+                  setMessage(null);
+                }}
+                className={`py-3 px-3 rounded-xl border text-sm font-medium transition-colors ${
+                  absenMode === "harian"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-cream text-muted"
+                }`}
+              >
+                Absensi Harian
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!piketTersedia) return;
+                  setAbsenMode("piket");
+                  setMessage(null);
+                }}
+                disabled={!piketTersedia}
+                className={`py-3 px-3 rounded-xl border text-sm font-medium transition-colors ${
+                  absenMode === "piket"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-cream text-muted"
+                } ${!piketTersedia ? "opacity-40 cursor-not-allowed" : ""}`}
+              >
+                Absensi Piket
+              </button>
+            </div>
+
+            {absenMode === "piket" && piketBelumAbsen.length > 0 && (
+              <div>
+                <label
+                  htmlFor="jadwal-piket"
+                  className="block text-sm font-medium text-text mb-2"
+                >
+                  Jadwal piket hari ini
+                </label>
+                {piketBelumAbsen.length === 1 ? (
+                  <p className="text-sm text-text bg-cream border border-border rounded-xl px-4 py-3">
+                    {piketBelumAbsen[0].nama_jadwal}
+                  </p>
+                ) : (
+                  <select
+                    id="jadwal-piket"
+                    value={selectedJadwalId}
+                    onChange={(e) =>
+                      setSelectedJadwalId(
+                        e.target.value ? Number(e.target.value) : ""
+                      )
+                    }
+                    className="input-field"
+                  >
+                    <option value="">-- Pilih Jadwal --</option>
+                    {piketBelumAbsen.map((p) => (
+                      <option key={p.jadwal_id} value={p.jadwal_id}>
+                        {p.nama_jadwal}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
+
+            {piketList.length > 0 && piketList.every((p) => p.sudah_absen) && (
+              <p className="text-xs text-muted">
+                Semua jadwal piket hari ini sudah di-absen.
+              </p>
+            )}
+          </div>
 
           <div className="relative">
             {!submitting && !isSuccess && (
@@ -294,7 +418,7 @@ export default function AbsenPage() {
         {message && <Alert type={message.type}>{message.text}</Alert>}
 
         <p className="text-xs text-muted text-center mt-6 animate-fade-in [animation-delay:0.2s]">
-          Tap tombol di atas lalu arahkan kamera ke QR dari admin/SC
+          Pilih jenis absensi, lalu scan QR yang sama dari sekretariat
         </p>
       </PageShell>
     );
