@@ -3,6 +3,7 @@ import {
   View, Text, FlatList, TextInput, Button, StyleSheet, ActivityIndicator, Alert, Modal, TouchableOpacity,
 } from "react-native";
 import { apiGet, apiPost, apiPut, apiDelete } from "../lib/api";
+import { useAuth } from "../lib/auth";
 
 const KATEGORI_LIST = ["konsumsi", "transportasi", "dokumentasi", "perlengkapan", "lainnya"];
 
@@ -17,6 +18,7 @@ type Transaksi = {
 };
 
 export default function KeuanganScreen() {
+  const { user } = useAuth();
   const [data, setData] = useState<Transaksi[]>([]);
   const [saldo, setSaldo] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export default function KeuanganScreen() {
   async function handleTambah(jenis: "masuk" | "keluar") {
     if (!nominal) return;
     const body: any = {
-      mahasiswa_id_input: 1,
+      mahasiswa_id_input: user!.mahasiswa_id,
       tanggal: new Date().toISOString().slice(0, 10),
       jenis,
       nominal: Number(nominal),

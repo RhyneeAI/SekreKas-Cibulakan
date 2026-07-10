@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, Button, StyleSheet, ActivityIndicator } from "react-native";
 import { apiGet } from "../lib/api";
+import { useAuth } from "../lib/auth";
 
 type Rekap = {
   mahasiswa_id: number;
@@ -14,6 +15,7 @@ function formatDate(d: Date) {
 }
 
 export default function AbsensiRekapScreen() {
+  const { user, logout } = useAuth();
   const [tanggal, setTanggal] = useState(new Date());
   const [data, setData] = useState<Rekap[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,11 @@ export default function AbsensiRekapScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.top}>
+        <Text style={styles.user}>{user?.nama}</Text>
+        <Button title="Logout" onPress={logout} color="crimson" />
+      </View>
+
       <View style={styles.dateRow}>
         <Button title="<" onPress={() => gantiHari(-1)} />
         <Text style={styles.header}>{formatDate(tanggal)}</Text>
@@ -61,6 +68,8 @@ export default function AbsensiRekapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, paddingTop: 48 },
+  top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  user: { fontSize: 14, color: "#666" },
   dateRow: {
     flexDirection: "row",
     justifyContent: "space-between",

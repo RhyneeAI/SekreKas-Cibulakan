@@ -1,12 +1,27 @@
+import { ActivityIndicator, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { AuthProvider, useAuth } from "./lib/auth";
+import LoginScreen from "./screens/LoginScreen";
 import KeuanganScreen from "./screens/KeuanganScreen";
 import LogbookScreen from "./screens/LogbookScreen";
 import AbsensiRekapScreen from "./screens/AbsensiRekapScreen";
 
 const Tab = createBottomTabNavigator();
 
-export default function App() {
+function AppContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!user) return <LoginScreen />;
+
   return (
     <NavigationContainer>
       <Tab.Navigator>
@@ -15,5 +30,13 @@ export default function App() {
         <Tab.Screen name="Absensi" component={AbsensiRekapScreen} />
       </Tab.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
