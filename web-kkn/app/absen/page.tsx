@@ -5,6 +5,7 @@ import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/Alert";
 import { LoadingCard } from "@/components/LoadingCard";
+import { ScanOverlay } from "@/components/ScanOverlay";
 
 const STORAGE_KEY = "kkn_absensi_device";
 
@@ -41,10 +42,24 @@ export default function AbsenPage() {
       ) {
         await scanner.stop();
       }
+    } catch {
+      // Scanner sudah berhenti
+    }
+    try {
       scanner.clear();
     } catch {
-      // Scanner sudah berhenti atau belum sempat start
+      // DOM mungkin sudah di-unmount
     }
+    stopCameraTracks();
+  }
+
+  function stopCameraTracks() {
+    document.querySelectorAll("#qr-preview video").forEach((el) => {
+      const video = el as HTMLVideoElement;
+      const stream = video.srcObject as MediaStream | null;
+      stream?.getTracks().forEach((track) => track.stop());
+      video.srcObject = null;
+    });
   }
 
   useEffect(() => {
@@ -129,7 +144,14 @@ export default function AbsenPage() {
     setMessage(null);
   }
 
-  function stopScanner() {
+  async function stopScanner() {
+    const scanner = scannerRef.current;
+    if (scanner) {
+      scannerRef.current = null;
+      await safeStopScanner(scanner);
+    } else {
+      stopCameraTracks();
+    }
     setScanning(false);
   }
 
@@ -154,31 +176,43 @@ export default function AbsenPage() {
     if (!scanning) return;
 
     scanHandledRef.current = false;
-    let cancelled = false;
+    let mounted = true;
     const scanner = new Html5Qrcode("qr-preview");
     scannerRef.current = scanner;
 
     scanner
       .start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        {
+          fps: 10,
+          aspectRatio: 1,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const edge = Math.min(viewfinderWidth, viewfinderHeight);
+            const size = Math.floor(edge * 0.75);
+            return { width: size, height: size };
+          },
+        },
         (decodedText) => {
-          if (cancelled || scanHandledRef.current) return;
+          if (!mounted || scanHandledRef.current) return;
           scanHandledRef.current = true;
-          setScanning(false);
-          doCheckIn(decodedText);
+          void (async () => {
+            scannerRef.current = null;
+            await safeStopScanner(scanner);
+            if (mounted) setScanning(false);
+            doCheckIn(decodedText);
+          })();
         },
         undefined
       )
       .catch(() => {
-        if (!cancelled) {
+        if (mounted) {
           setMessage({ type: "error", text: "Tidak bisa mengakses kamera" });
           setScanning(false);
         }
       });
 
     return () => {
-      cancelled = true;
+      mounted = false;
       if (scannerRef.current === scanner) {
         scannerRef.current = null;
       }
@@ -200,13 +234,14 @@ export default function AbsenPage() {
         title="Scan QR"
         subtitle="Arahkan kamera ke QR Code absensi hari ini"
       >
-        <div className="card overflow-hidden p-0">
-          <div
-            id="qr-preview"
-            className="w-full aspect-square bg-text/90"
-          />
+        <div className="card overflow-hidden p-0 relative animate-scale-in">
+          <div id="qr-preview" className="w-full aspect-square bg-text" />
+          <ScanOverlay />
         </div>
-        <button onClick={stopScanner} className="btn-secondary mt-4">
+        <button
+          onClick={() => void stopScanner()}
+          className="btn-secondary mt-4 animate-fade-in-up [animation-delay:0.15s]"
+        >
           Batal
         </button>
       </PageShell>
@@ -214,28 +249,51 @@ export default function AbsenPage() {
   }
 
   if (mode === "ready" && device) {
+    const isSuccess = message?.type === "success";
+
     return (
       <PageShell title="Absensi" subtitle={`Halo, ${device.nama}`}>
-        <div className="card text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/15 border border-success/30 flex items-center justify-center">
+        <div className="card text-center animate-scale-in">
+          <div
+            className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center transition-colors duration-500 ${
+              isSuccess
+                ? "bg-success/20 border-2 border-success animate-success-pop"
+                : "bg-success/15 border border-success/30"
+            }`}
+          >
             <span className="text-2xl" aria-hidden>
-              ✓
+              {isSuccess ? "🎉" : "✓"}
             </span>
           </div>
           <p className="text-sm text-muted mb-1">Device terdaftar</p>
           <p className="font-semibold text-text text-lg mb-6">{device.nama}</p>
-          <button
-            onClick={startScanner}
-            disabled={submitting}
-            className="btn-primary text-lg"
-          >
-            {submitting ? "Memproses..." : "Scan QR & Absen"}
-          </button>
+
+          <div className="relative">
+            {!submitting && !isSuccess && (
+              <span className="absolute inset-0 rounded-xl border-2 border-primary/40 animate-pulse-ring pointer-events-none" />
+            )}
+            <button
+              onClick={startScanner}
+              disabled={submitting}
+              className={`btn-primary text-lg relative z-10 ${
+                !submitting && !isSuccess ? "animate-pulse-soft" : ""
+              }`}
+            >
+              {submitting ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Memproses...
+                </span>
+              ) : (
+                "Scan QR & Absen"
+              )}
+            </button>
+          </div>
         </div>
 
         {message && <Alert type={message.type}>{message.text}</Alert>}
 
-        <p className="text-xs text-muted text-center mt-6">
+        <p className="text-xs text-muted text-center mt-6 animate-fade-in [animation-delay:0.2s]">
           Tap tombol di atas lalu arahkan kamera ke QR dari admin/SC
         </p>
       </PageShell>
@@ -251,8 +309,8 @@ export default function AbsenPage() {
           : "Masukkan nama dan PIN yang sudah kamu buat sebelumnya."
       }
     >
-      <div className="card space-y-4">
-        <div>
+      <div className="card space-y-4 animate-scale-in">
+        <div className="animate-fade-in-up [animation-delay:0.05s]">
           <label htmlFor="nama" className="block text-sm font-medium text-text mb-2">
             Nama Anggota
           </label>
@@ -273,7 +331,7 @@ export default function AbsenPage() {
           </select>
         </div>
 
-        <div>
+        <div className="animate-fade-in-up [animation-delay:0.12s]">
           <label htmlFor="pin" className="block text-sm font-medium text-text mb-2">
             PIN (4–6 digit)
           </label>
@@ -289,21 +347,28 @@ export default function AbsenPage() {
           />
         </div>
 
-        <button
-          onClick={mode === "register" ? handleRegister : handleVerifyPin}
-          disabled={submitting}
-          className="btn-primary"
-        >
-          {submitting
-            ? "Memproses..."
-            : mode === "register"
-              ? "Daftar Device"
-              : "Verifikasi PIN"}
-        </button>
+        <div className="animate-fade-in-up [animation-delay:0.2s]">
+          <button
+            onClick={mode === "register" ? handleRegister : handleVerifyPin}
+            disabled={submitting}
+            className="btn-primary"
+          >
+            {submitting ? (
+              <span className="inline-flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Memproses...
+              </span>
+            ) : mode === "register" ? (
+              "Daftar Device"
+            ) : (
+              "Verifikasi PIN"
+            )}
+          </button>
+        </div>
       </div>
 
       {mode === "register" && (
-        <p className="mt-4 text-sm text-center text-muted">
+        <p className="mt-4 text-sm text-center text-muted animate-fade-in-up [animation-delay:0.28s]">
           Sudah pernah daftar dari device lain?{" "}
           <button
             onClick={() => {

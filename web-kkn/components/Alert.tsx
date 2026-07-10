@@ -12,7 +12,7 @@ const styles = {
 export function Alert({ type, children }: AlertProps) {
   return (
     <div
-      className={`mt-4 px-4 py-3 rounded-xl border text-sm text-center ${styles[type]}`}
+      className={`mt-4 px-4 py-3 rounded-xl border text-sm text-center animate-fade-in-up ${styles[type]}`}
       role="alert"
     >
       {children}

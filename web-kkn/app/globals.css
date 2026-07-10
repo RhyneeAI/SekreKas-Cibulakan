@@ -33,4 +33,32 @@
   .card {
     @apply bg-white/60 border border-border rounded-2xl p-5 shadow-sm;
   }
+
+  .page-enter {
+    @apply animate-fade-in-up;
+  }
+
+  /* html5-qrcode: video preview memenuhi container */
+  #qr-preview {
+    @apply relative w-full overflow-hidden;
+    min-height: 280px;
+  }
+
+  #qr-preview video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  #qr-preview > div {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 280px !important;
+    border: none !important;
+  }
+
+  #qr-preview img[alt="Info icon"] {
+    display: none !important;
+  }
 }

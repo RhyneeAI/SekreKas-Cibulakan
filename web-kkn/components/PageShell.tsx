@@ -10,8 +10,8 @@ export function PageShell({ title, subtitle, children }: PageShellProps) {
   return (
     <div className="min-h-screen bg-cream px-4 py-6 sm:py-8">
       <div className="max-w-sm mx-auto w-full">
-        <header className="flex flex-col items-center mb-6 text-center">
-          <div className="bg-white/70 border border-border rounded-full p-2 mb-3 shadow-sm">
+        <header className="flex flex-col items-center mb-6 text-center animate-fade-in-down">
+          <div className="bg-white/70 border border-border rounded-full p-2 mb-3 shadow-sm animate-scale-in">
             <Image
               src="/logo.png"
               alt="Logo SekreKas Cibulakan"
