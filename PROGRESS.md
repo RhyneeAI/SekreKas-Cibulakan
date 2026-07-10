@@ -52,8 +52,18 @@ Dokumen ini merangkum status implementasi project. Gunakan sebagai acuan sebelum
 | 007 | `kkn_mahasiswa` + jabatan & fakultas_prodi | ✅ |
 | 008 | Seed 17 anggota kelompok | ✅ |
 | 009 | Ira Nurhayati → Bendahara | ✅ |
+| 010 | `kkn_fakultas` | ✅ |
+| 011 | `kkn_prodi` | ✅ |
+| 012 | Migrasi `fakultas_prodi` → `prodi_id` FK | ✅ |
 
-### Data Anggota
+### Struktur Akademik
+
+| Tabel | Relasi |
+|---|---|
+| `kkn_fakultas` | Master fakultas |
+| `kkn_prodi` | FK → `kkn_fakultas` |
+| `kkn_mahasiswa.prodi_id` | FK → `kkn_prodi` |
+
 
 - **17 anggota** ter-seed (NIM placeholder `KKN-001` … `KKN-017`)
 - **15 pengurus** bisa login mobile (exclude `Anggota`)

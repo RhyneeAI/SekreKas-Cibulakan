@@ -25,7 +25,12 @@ export async function GET(req: NextRequest) {
 
   const data = detail
     ? await query(
-        "SELECT id, nama, nim, jabatan, fakultas_prodi FROM kkn_mahasiswa ORDER BY nama ASC"
+        `SELECT m.id, m.nama, m.nim, m.jabatan,
+                p.nama AS prodi, f.nama AS fakultas
+         FROM kkn_mahasiswa m
+         LEFT JOIN kkn_prodi p ON p.id = m.prodi_id
+         LEFT JOIN kkn_fakultas f ON f.id = p.fakultas_id
+         ORDER BY m.nama ASC`
       )
     : await query("SELECT id, nama FROM kkn_mahasiswa ORDER BY nama ASC");
 
