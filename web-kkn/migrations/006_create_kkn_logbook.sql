@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS kkn_logbook (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  mahasiswa_id INT UNSIGNED NOT NULL,
+  id SERIAL PRIMARY KEY,
+  mahasiswa_id INTEGER NOT NULL REFERENCES kkn_mahasiswa(id) ON DELETE CASCADE,
   tanggal DATE NOT NULL,
   kegiatan VARCHAR(150) NOT NULL,
   deskripsi TEXT,
-  foto_url VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (mahasiswa_id) REFERENCES kkn_mahasiswa(id) ON DELETE CASCADE,
-  INDEX idx_tanggal (tanggal)
+  foto_url TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_logbook_tanggal ON kkn_logbook (tanggal);

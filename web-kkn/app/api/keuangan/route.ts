@@ -63,13 +63,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = await query<any>(
-    "INSERT INTO kkn_keuangan (mahasiswa_id_input, tanggal, jenis, nominal, kategori, keterangan) VALUES (?, ?, ?, ?, ?, ?)",
+  const result = await query<{ id: number }>(
+    "INSERT INTO kkn_keuangan (mahasiswa_id_input, tanggal, jenis, nominal, kategori, keterangan) VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
     [mahasiswa_id_input, tanggal, jenis, nominal, kategori || null, keterangan || null]
   );
 
   return NextResponse.json(
-    { success: true, id: result.insertId },
+    { success: true, id: result[0]?.id },
     { status: 201 }
   );
 }

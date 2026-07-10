@@ -45,11 +45,11 @@ export async function POST(req: NextRequest) {
 
   try {
     await query(
-      "INSERT INTO kkn_absensi (mahasiswa_id, uuid, tanggal, waktu_masuk, user_agent) VALUES (?, ?, ?, CURTIME(), ?)",
+      "INSERT INTO kkn_absensi (mahasiswa_id, uuid, tanggal, waktu_masuk, user_agent) VALUES (?, ?, ?, CURRENT_TIME, ?)",
       [mahasiswaId, uuid, today, userAgent]
     );
   } catch (err: any) {
-    if (err.code === "ER_DUP_ENTRY") {
+    if (err.code === "23505") {
       return NextResponse.json(
         { success: false, message: "Sudah absen hari ini" },
         { status: 409 }

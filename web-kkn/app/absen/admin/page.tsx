@@ -2,22 +2,28 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { PageShell } from "@/components/PageShell";
+import { LoadingCard } from "@/components/LoadingCard";
 
 export default function AdminQRPage() {
-  const [token, setToken] = useState<string | null>(null);
   const [expiredAt, setExpiredAt] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   async function fetchQR() {
-    setLoading(true);
+    setRefreshing(true);
     const res = await fetch("/api/absensi/qr-today");
     const data = await res.json();
-    setToken(data.token);
     setExpiredAt(data.expired_at);
-    const url = await QRCode.toDataURL(data.token, { width: 300 });
+    const url = await QRCode.toDataURL(data.token, {
+      width: 280,
+      margin: 2,
+      color: { dark: "#4A3427", light: "#FFFFFF" },
+    });
     setQrDataUrl(url);
     setLoading(false);
+    setRefreshing(false);
   }
 
   useEffect(() => {
@@ -25,31 +31,57 @@ export default function AdminQRPage() {
   }, []);
 
   return (
-    <main className="p-6 max-w-sm mx-auto text-center">
-      <h1 className="text-2xl font-bold mb-4">QR Absensi Hari Ini</h1>
+    <PageShell
+      title="QR Absensi"
+      subtitle="Tampilkan QR ini untuk di-scan anggota kelompok"
+    >
+      {loading ? (
+        <LoadingCard label="Memuat QR hari ini..." />
+      ) : (
+        <>
+          <div className="card text-center">
+            <p className="text-xs font-medium text-secondary uppercase tracking-wider mb-4">
+              QR Hari Ini
+            </p>
 
-      {loading && <p>Memuat...</p>}
+            {qrDataUrl && (
+              <div className="inline-block p-3 bg-white rounded-2xl border border-border shadow-sm mb-4">
+                <img
+                  src={qrDataUrl}
+                  alt="QR Code Absensi"
+                  className="w-64 h-64 mx-auto block"
+                />
+              </div>
+            )}
 
-      {qrDataUrl && (
-        <img
-          src={qrDataUrl}
-          alt="QR Code Absensi"
-          className="w-72 h-72 mx-auto block"
-        />
+            {expiredAt && (
+              <p className="text-sm text-muted">
+                Berlaku hingga{" "}
+                <span className="font-medium text-text">
+                  {new Date(expiredAt).toLocaleString("id-ID", {
+                    dateStyle: "long",
+                    timeStyle: "short",
+                  })}
+                </span>
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={fetchQR}
+            disabled={refreshing}
+            className="btn-primary mt-4"
+          >
+            {refreshing ? "Memperbarui..." : "Perbarui QR"}
+          </button>
+
+          <p className="text-xs text-muted text-center mt-6 leading-relaxed">
+            Buka halaman ini setiap pagi dan tampilkan QR ke anggota yang akan
+            absen via{" "}
+            <span className="font-medium text-secondary">/absen</span>
+          </p>
+        </>
       )}
-
-      {expiredAt && (
-        <p className="text-gray-500 text-sm mt-2">
-          Berlaku hingga: {new Date(expiredAt).toLocaleString("id-ID")}
-        </p>
-      )}
-
-      <button
-        onClick={fetchQR}
-        className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg"
-      >
-        Perbarui QR
-      </button>
-    </main>
+    </PageShell>
   );
 }

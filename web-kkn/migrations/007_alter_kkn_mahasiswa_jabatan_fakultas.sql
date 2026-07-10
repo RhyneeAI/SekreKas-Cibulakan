@@ -1,0 +1,3 @@
+ALTER TABLE kkn_mahasiswa
+  ADD COLUMN IF NOT EXISTS jabatan VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS fakultas_prodi VARCHAR(200);

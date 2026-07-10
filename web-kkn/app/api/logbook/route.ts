@@ -37,13 +37,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = await query<any>(
-    "INSERT INTO kkn_logbook (mahasiswa_id, tanggal, kegiatan, deskripsi, foto_url) VALUES (?, ?, ?, ?, ?)",
+  const result = await query<{ id: number }>(
+    "INSERT INTO kkn_logbook (mahasiswa_id, tanggal, kegiatan, deskripsi, foto_url) VALUES (?, ?, ?, ?, ?) RETURNING id",
     [mahasiswa_id, tanggal, kegiatan, deskripsi || null, foto_url || null]
   );
 
   return NextResponse.json(
-    { success: true, id: result.insertId },
+    { success: true, id: result[0]?.id },
     { status: 201 }
   );
 }

@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Absensi KKN",
-  description: "Sistem absensi KKN tanpa login",
+  title: "SekreKas Cibulakan",
+  description: "Sistem absensi KKN Desa Cibulakan",
 };
 
 export default function RootLayout({
@@ -12,7 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className="m-0 font-sans antialiased">{children}</body>
+      <body className="m-0 font-sans antialiased bg-cream text-text">
+        {children}
+      </body>
     </html>
   );
 }

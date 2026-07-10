@@ -1,4 +1,4 @@
-# Boilerplate Sistem KKN
+# SekreKas Cibulakan
 
 Monorepo berisi 2 project:
 - `web-kkn/` — Next.js (web absensi `/absen` + seluruh backend API)
@@ -7,9 +7,9 @@ Monorepo berisi 2 project:
 ## Setup
 
 ```bash
-npm install               # install semua dependencies (root monorepo)
-cp web-kkn/.env.example web-kkn/.env   # isi kredensial MySQL
-npm run migrate           # jalankan semua migration
+npm install
+cp web-kkn/.env.example web-kkn/.env   # isi kredensial Supabase
+npm run migrate                        # jalankan migration ke Supabase Postgres
 ```
 
 ## Menjalankan
@@ -28,5 +28,4 @@ npm run dev:mobile        # mobile → expo start
 
 ## Yang masih perlu dilengkapi
 - Auth sederhana di mobile app (saat ini `mahasiswa_id` masih hardcode `1`)
-- Deploy `web-kkn` ke hosting (Vercel/VPS) supaya `mobile-app` bisa hit API dari luar
-# SekreKas-Cibulakan
+- Deploy `web-kkn` ke Vercel (set env Supabase di dashboard Vercel)

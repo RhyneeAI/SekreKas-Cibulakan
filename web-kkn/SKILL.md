@@ -467,3 +467,49 @@ refactor: rapikan struktur folder screens
 - Setiap endpoint baru wajib dicoba jalan (manual test via curl/Postman atau langsung dari UI) sebelum dianggap selesai.
 - Migration baru wajib dicoba dijalankan (`npm run migrate`) di database lokal sebelum di-commit.
 - Jangan modifikasi migration yang sudah pernah dijalankan/di-commit sebelumnya — buat file migration baru untuk perubahan skema.
+
+## Standarisasi Desain (UI)
+
+Prinsip: fungsional dan konsisten di atas segalanya — ini tools internal kelompok, bukan produk publik. Hindari over-design.
+
+### Warna
+Pakai palet terbatas, definisikan sekali lalu reuse di semua screen/halaman:
+--color-primary:    #2563EB   (aksi utama: tombol simpan, tab aktif)
+--color-success:    #16A34A   (transaksi masuk, status hadir)
+--color-danger:     #DC2626   (transaksi keluar, hapus, error)
+--color-text:       #1F2937   (teks utama)
+--color-text-muted: #6B7280   (subtext, keterangan, timestamp)
+--color-border:     #E5E7EB   (garis pembatas antar item)
+--color-bg:         #FFFFFF   (background utama)
+
+### Tipografi
+- Satu font family aja: font sistem default (`system-ui` di web, default di React Native) — tidak perlu import font custom untuk tools internal.
+- Skala ukuran terbatas: `12px` (subtext/caption), `14px` (body), `16px` (label/input), `20px` (heading section), `24px` (heading halaman).
+
+### Layout & Komponen
+- Spacing konsisten pakai kelipatan 4: `4, 8, 12, 16, 24, 32`.
+- Semua input/button full-width di mobile (form absensi, keuangan, logbook) — hindari layout multi-kolom yang ribet di layar kecil.
+- List item (transaksi, logbook, rekap absensi) selalu pola: judul/nama di kiri, info sekunder di kanan atau di bawahnya sebagai subtext, dipisah border tipis antar item (bukan card dengan shadow — terlalu berat untuk list panjang).
+- Status pakai warna, bukan cuma teks: hijau untuk hadir/masuk, merah untuk keluar/belum, abu-abu untuk netral.
+
+### Yang Sengaja Dihindari
+- Jangan pakai gradient, shadow berlebihan, atau animasi kompleks — bikin app kerasa berat dan nggak perlu untuk tools internal.
+- Jangan bikin desain custom per halaman — semua halaman (absensi, keuangan, logbook) harus terasa satu keluarga, pakai token warna & spacing yang sama.
+- Jangan tambah dependency UI library besar (misal full component library) kecuali dependency yang sudah ada di boilerplate — cukup styling manual dengan StyleSheet (React Native) atau inline style/CSS module (Next.js).
+
+### Warna (KKN Desa Cibulakan)
+--color-bg:          #F5F1E1   (krem, background utama — dari background logo)
+--color-primary:     #C68A3E   (kuning keemasan sinar matahari — aksi utama, tombol, tab aktif)
+--color-secondary:   #8B5E3C   (coklat daun kanan — aksen sekunder, ikon)
+--color-success:     #6E7F4F   (hijau daun kiri — transaksi masuk, status hadir)
+--color-danger:      #A65B4A   (coklat kemerahan buku — transaksi keluar, hapus, error)
+--color-text:         #4A3427   (coklat tua teks logo — teks utama, heading)
+--color-text-muted:  #8B7A6B   (coklat keunguan halaman buku — subtext, keterangan)
+--color-border:      #E3D9C4   (turunan krem lebih gelap — garis pembatas antar item)
+
+**Catatan pemakaian:**
+- `--color-bg` krem dipakai sebagai background utama di web absensi maupun mobile app — jangan pakai putih polos (`#FFFFFF`), krem ini yang jadi identitas visual.
+- `--color-primary` (kuning keemasan) untuk tombol utama seperti "Scan QR & Absen", tab aktif di mobile app.
+- `--color-success` (hijau) & `--color-danger` (coklat kemerahan) dipakai konsisten untuk status hadir/masuk vs keluar/belum — selaras dengan makna warna daun di logo (hijau = tumbuh/positif).
+- `--color-text` coklat tua dipakai ganti hitam pekat (`#000000`) untuk semua teks — biar konsisten dengan nuansa hangat logo, bukan kontras tajam ala app modern generik.
+- Logo sendiri ditaruh di header halaman `/absen` dan splash screen mobile app.
