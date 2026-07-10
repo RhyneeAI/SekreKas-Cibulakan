@@ -16,7 +16,6 @@
     "concurrently": "^9.1.0"
   },
   "dependencies": {
-    "@types/react": "~19.1.10",
-    "expo": "^54.0.35"
+    "react-native": "^0.81.5"
   }
 }
