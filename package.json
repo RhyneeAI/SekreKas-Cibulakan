@@ -3,9 +3,13 @@
   "private": true,
   "workspaces": ["web-kkn", "mobile-app"],
   "scripts": {
+    "dev": "concurrently -n web,mobile -c cyan,magenta \"npm run dev:web\" \"npm run dev:mobile\"",
     "dev:web": "npm run dev -w web-kkn",
     "dev:mobile": "npm run start -w mobile-app",
     "migrate": "npm run migrate -w web-kkn",
     "build:web": "npm run build -w web-kkn"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
   }
 }
