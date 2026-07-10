@@ -1,7 +1,10 @@
 {
   "name": "kkn-boilerplate",
   "private": true,
-  "workspaces": ["web-kkn", "mobile-app"],
+  "workspaces": [
+    "web-kkn",
+    "mobile-app"
+  ],
   "scripts": {
     "dev": "concurrently -n web,mobile -c cyan,magenta \"npm run dev:web\" \"npm run dev:mobile\"",
     "dev:web": "npm run dev -w web-kkn",
@@ -11,5 +14,9 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
+  },
+  "dependencies": {
+    "@types/react": "~19.1.10",
+    "expo": "^54.0.35"
   }
 }
